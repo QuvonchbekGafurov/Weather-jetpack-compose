@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Weather Jetpack compose</string>
+    <string name="my_api_key">AIzaSyC1IHWm2Y_1uCMckD3_rDKHiEWIDqATC3U</string>
+
+</resources>
