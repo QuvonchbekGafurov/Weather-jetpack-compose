@@ -18,8 +18,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +52,7 @@ import com.example.weatherjetpackcompose.ui.localdata.dailyWeather
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
+import kotlinx.coroutines.launch
 import loadWeatherDataFromAssets
 import org.json.JSONObject
 import saveWeatherDataToStorage
@@ -57,33 +60,38 @@ import kotlin.math.log
 
 @Composable
 fun Today(
-    Day:Int
+    Day: Int
 ) {
     var city by remember { mutableStateOf("Loading...") }
     var hourlyTemperature by remember { mutableStateOf<List<Hour>?>(null) }
     var current by remember { mutableStateOf<Day?>(null) }
     var astro by remember { mutableStateOf<Astro?>(null) }
+    var mutableTimeList = remember { mutableStateListOf<String>() }
 
     var weatherDatagson by remember { mutableStateOf<WeatherData?>(null) }
     var isLoading by remember { mutableStateOf(true) }
 
     val context = LocalContext.current
     weatherDatagson = loadWeatherDataFromAssets(context)
-    Log.e("TAG", "Today: $weatherDatagson", )
+    Log.e("TAG", "Today: $weatherDatagson")
+    val scope = rememberCoroutineScope() // Scope yaratamiz
+
     // Joylashuvni olish
     LaunchedEffect(Unit) {
 
 
         getLocation(context = context) { response ->
             city = response
-            Log.e("TAG", "Location:$response ",)
+            Log.e("TAG", "Location:$response ")
         }
         // Ob-havo ma'lumotlarini olish
         getData("Tashkent", context) { weatherData ->
             if (weatherData != null) {
-                Log.e("TAG", "Qalampir: $weatherData",)
+                Log.e("TAG", "Qalampir: $weatherData")
 
                 hourlyTemperature = weatherData!!.forecast.forecastday[Day].hour
+                Log.e("TAG", "Today22:${hourlyTemperature} ")
+
                 current = weatherData!!.forecast.forecastday[Day].day
                 astro = weatherData!!.forecast.forecastday[Day].astro
                 saveWeatherDataToStorage(context, weatherData)
@@ -99,37 +107,54 @@ fun Today(
 
             }
         }
+
     }
     Box(
-        modifier =Modifier
+        modifier = Modifier
             .alpha(if (isLoading) 0.3f else 1f)
             .fillMaxWidth()
             .background(mainback)
     ) {
+        LaunchedEffect(isLoading) {
+            if (!isLoading) {
+                // Ma'lumot kelganidan keyin ishchi for loop'ni ishga tushiradi
+                scope.launch {
+                    hourlyTemperature?.let { hourlyTemps ->
+                        for (i in 2..23 step 4) {
+                            val chanceOfRain = hourlyTemps.getOrNull(i)?.chance_of_rain
+                            if (chanceOfRain != null) {
+                                mutableTimeList.add(chanceOfRain.toString())
+                                Log.e("TAG", "Today1: ${hourlyTemps[i].time}")
+                            }
+                        }
+                    }
+                    Log.e("TAG", "Today122: $mutableTimeList", )
+                }
+            }
+        }
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
             item {
-                WeatherStats( current1=current?: dailyWeather)
+                WeatherStats(current1 = current ?: dailyWeather)
                 HourlyForecast(hourlyTemperature ?: emptyList())
                 LineChart(modifier = Modifier)
-                val rainfallData = listOf(0f, 40f, 75f, 30f, 50f, 90f) // Yomg'ir foizlari
-                RainfallBarChart(rainfallData,
+                Log.e("TAG", "Today4444: ${mutableTimeList.joinToString (",")}", )
+                RainfallBarChart(
+                    mutableTimeList,
                     modifier = Modifier
                         .padding(horizontal = 10.dp, vertical = 8.dp)
                         .background(mainback)
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(16.dp)),
 
-                    ,
-
-                )
+                    )
                 Spacer(modifier = Modifier.height(20.dp))
-                Sunset(astro?: astroData)
+                Sunset(astro ?: astroData)
             }
 
 
         }
-        if(isLoading){
+        if (isLoading) {
             Box(
                 contentAlignment = Alignment.Center, // O'rtaga joylashtirish
                 modifier = Modifier.fillMaxSize()
@@ -142,8 +167,6 @@ fun Today(
     }
 
 }
-
-
 
 
 fun getLocation(context: Context, onLocationRetrieved: (String) -> Unit) {
@@ -202,14 +225,20 @@ fun getData(city: String, context: Context, onResult: (WeatherData?) -> Unit) {
             when (error) {
                 is TimeoutError -> {
                     Log.e("MyLog", "Error: Timeout. Internet sekin.")
-                    Toast.makeText(context, "Internet sekin. Iltimos, kuting.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Internet sekin. Iltimos, kuting.", Toast.LENGTH_LONG)
+                        .show()
                 }
+
                 is NoConnectionError -> {
                     Log.e("MyLog", "Error: No internet connection.")
                     Toast.makeText(context, "Internet aloqasi yo'q.", Toast.LENGTH_LONG).show()
                 }
+
                 else -> {
-                    Log.e("MyLog", "VolleyError: ${error.networkResponse?.statusCode ?: "No Response"}")
+                    Log.e(
+                        "MyLog",
+                        "VolleyError: ${error.networkResponse?.statusCode ?: "No Response"}"
+                    )
                 }
             }
             onResult(null)
@@ -219,6 +248,7 @@ fun getData(city: String, context: Context, onResult: (WeatherData?) -> Unit) {
     queue.add(sRequest)
 
 }
+
 private fun parseResponse(response: String): WeatherData? {
     return try {
         val jsonObject = JSONObject(response)

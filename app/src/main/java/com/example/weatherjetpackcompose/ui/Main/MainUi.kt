@@ -241,7 +241,7 @@ fun ScrollableMotionLayout() {
                             modifier = Modifier
                                 .size(if (computedProgress <= 0.5f) 120.dp else 60.dp)
                                 .layoutId("Icon"),
-                            contentScale = ContentScale.Crop,
+                            contentScale = ContentScale.Fit,
                         )
                         Text(
                             text = "${weatherDatagson?.current?.condition?.text}",
@@ -263,12 +263,12 @@ fun ScrollableMotionLayout() {
                             text = "${weatherDatagson?.current?.temp_c?.toInt()}\u00B0",
                             color = if (computedProgress <= 0.5f) Color.White else Color.Black,
                             fontSize = if (computedProgress <= 0.5f) 90.sp else 60.sp,
-                            letterSpacing = if (computedProgress <= 0.5f) -10.sp else -5.sp,
+                            letterSpacing = if (computedProgress <= 0.5f) -5.sp else -1.sp,
                             modifier = Modifier.align(Alignment.Bottom)
                         )
                         Text(
 
-                            text = "Fells like ${weatherDatagson?.current?.feelslike_c}°",
+                            text = "Fells like ${weatherDatagson?.current?.feelslike_c?.toInt()}°",
                             color = if (computedProgress <= 0.5f) Color.White else Color.Black,
                             modifier = Modifier
                             .padding(bottom = if (computedProgress <= 0.5f) 30.dp else 15.dp),
@@ -296,7 +296,7 @@ fun ScrollableMotionLayout() {
                             .padding(20.dp)
                     ) {
                         Text(
-                            text = "Day ${weatherDatagson?.forecast?.forecastday?.get(0)?.day?.maxtemp_c}°",
+                            text = "Day ${weatherDatagson?.forecast?.forecastday?.get(0)?.day?.maxtemp_c?.toInt()}°",
                             color = if (computedProgress <= 0.5f) Color.White else Color.Black,
                             modifier = Modifier
                                 .alpha(
@@ -308,7 +308,7 @@ fun ScrollableMotionLayout() {
                             fontSize = 18.sp,
                         )
                         Text(
-                            text = "Night ${weatherDatagson?.forecast?.forecastday?.get(0)?.day?.mintemp_c}°",
+                            text = "Night ${weatherDatagson?.forecast?.forecastday?.get(0)?.day?.mintemp_c?.toInt()}°",
                             color = if (computedProgress <= 0.5f) Color.White else Color.Black,
                             modifier = Modifier.alpha(
                                     when {

@@ -1,5 +1,6 @@
 package com.example.weatherjetpackcompose.ui.Chart
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,7 +36,8 @@ import com.example.weatherjetpackcompose.ui.WeatherState.ImageInCircle
 import com.example.weatherjetpackcompose.R
 
 @Composable
-fun RainfallBarChart(rainfallPercentages: List<Float>, modifier: Modifier) {
+fun RainfallBarChart(rainfallPercentages:  List<String>, modifier: Modifier) {
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -43,20 +51,26 @@ fun RainfallBarChart(rainfallPercentages: List<Float>, modifier: Modifier) {
             Text(text = "Chance of rain", fontSize = 15.sp)
         }
         Spacer(modifier = Modifier.padding(vertical = 5.dp))
+        val timeList = listOf("2AM", "6AM", "10AM", "2PM", "6PM", "10PM")
 
-        rainfallPercentages.forEach { percentage ->
-            RainfallBar(percentage)
+        Log.e("TAG", "RainfallBarChart: ${rainfallPercentages.joinToString (",")}", ) // String qiymatlarni Float ga o'zgartirish va har bir barni chizish
+        rainfallPercentages.forEachIndexed { index, percentage ->
+            val floatValue = percentage.toFloatOrNull() ?: 0f  // Null holatlarni oldini olish
+            val timeValue = timeList.getOrNull(index) ?: "N/A" // timeList dan mos qiymatni olish
+            RainfallBar(floatValue, timeValue) // Bu yerda qiymatni Float sifatida va vaqtni yuboramiz
             Spacer(modifier = Modifier.height(8.dp)) // Barlar orasidagi bo'sh joy
         }
-
     }
 }
 
 @Composable
-fun RainfallBar(percentage: Float) {
+fun RainfallBar(percentage: Float,time:String) {
     val barColor = horizontalChcolor
     Row(modifier = Modifier) {
-        Text(text = "12 PM", Modifier.weight(1f).align(alignment = Alignment.CenterVertically))
+        Text(text = "$time",
+            Modifier
+                .weight(1f)
+                .align(alignment = Alignment.CenterVertically))
         Box(
             modifier = Modifier
                 .weight(5f)
@@ -71,7 +85,10 @@ fun RainfallBar(percentage: Float) {
                     .background(barColor) // Foizga qarab rang
             )
         }
-        Text(text = "45%", modifier = Modifier.weight(1f).align(Alignment.CenterVertically) .fillMaxWidth(), // To'liq kenglikda bo'lishi uchun
+        Text(text = "${percentage.toInt()}%", modifier = Modifier
+            .weight(1f)
+            .align(Alignment.CenterVertically)
+            .fillMaxWidth(), // To'liq kenglikda bo'lishi uchun
             textAlign = TextAlign.Center)// Matn o'ng tomonga yopishtiriladi
     }
 }
