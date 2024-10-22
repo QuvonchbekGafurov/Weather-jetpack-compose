@@ -32,16 +32,14 @@ fun Sunset(astro:Astro) {
                 Image = R.drawable.sunrise,
                 label = "Sunrise",
                 mainValue = "${astro.sunrise}",
-                subValue = "2 km/h",
-                subValueColor = Color.Red
+
             )
             WeatherInfoCard(
                 Modifier.weight(1f),
                 Image = R.drawable.sunset,
                 label = "Sunset",
                 mainValue = "${astro.sunset}",
-                subValue = "10%",
-                subValueColor = Color.Magenta
+
             )
         }
         Row(
@@ -53,16 +51,14 @@ fun Sunset(astro:Astro) {
                 Image = R.drawable.nights_stay,
                 label = "Moonrise",
                 mainValue = "${astro.moonrise}",
-                subValue = "2 km/h",
-                subValueColor = Color.Red
+
             )
             WeatherInfoCard(
                 Modifier.weight(1f),
                 Image = R.drawable.moonset,
                 label = "Moonset",
                 mainValue = "${astro.moonset}",
-                subValue = "10%",
-                subValueColor = Color.Magenta
+
             )
         }
     }

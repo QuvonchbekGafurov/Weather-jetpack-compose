@@ -136,9 +136,9 @@ fun Today(
             modifier = Modifier.fillMaxSize()
         ) {
             item {
-                WeatherStats(current1 = current ?: dailyWeather)
+                WeatherStats(current1 = current ?: dailyWeather,hourlyTemperature ?: emptyList())
                 HourlyForecast(hourlyTemperature ?: emptyList())
-                LineChart(modifier = Modifier)
+                // LineChart(modifier = Modifier)
                 Log.e("TAG", "Today4444: ${mutableTimeList.joinToString (",")}", )
                 RainfallBarChart(
                     mutableTimeList,

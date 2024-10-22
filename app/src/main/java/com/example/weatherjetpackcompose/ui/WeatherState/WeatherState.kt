@@ -1,4 +1,5 @@
 package com.example.weatherjetpackcompose.ui.WeatherState
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,8 @@ import com.example.weatherjetpackcompose.theme.mainback
 import com.example.weatherjetpackcompose.R
 import com.example.weatherjetpackcompose.modelapi.Current
 import com.example.weatherjetpackcompose.modelapi.Day
+import com.example.weatherjetpackcompose.modelapi.Hour
+import kotlin.math.log
 
 @Composable
 fun WeatherInfoCard(
@@ -41,8 +44,6 @@ fun WeatherInfoCard(
     Image:Int,
     label: String,
     mainValue: String,
-    subValue: String,
-    subValueColor: Color
 ) {
     Surface(
         shape = RoundedCornerShape(16.dp),
@@ -77,13 +78,29 @@ fun WeatherInfoCard(
 }
 
 @Composable
-fun WeatherStats(current1: Day) {
+fun WeatherStats(current1: Day,hourlytemp:List<Hour>) {
+    var hourlyTemperature by remember { mutableStateOf<List<Hour>?>(null) }
+
     var current by remember { mutableStateOf<Day?>(null) }
     current=current1
+    hourlyTemperature=hourlytemp
+    var pressure by remember { mutableStateOf<Int>(1000) }
+    if (hourlyTemperature != null) {
+        if (hourlyTemperature!!.isNotEmpty()) {
+            pressure = hourlyTemperature!![0].pressure_mb.toInt()
+            Log.e("TAG", "WeatherStats122: $pressure", )
+        }
+    } else {
+        // Handle the case where the list is empty
+        pressure = 1000 // or set to a default value, or handle accordingly
+    }
+
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
     ) {
+        //hourlyTemperature=hourlytemp
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -93,8 +110,7 @@ fun WeatherStats(current1: Day) {
                 Image = R.drawable.air,
                 label = "Wind speed",
                 mainValue = "${current!!.maxtemp_c.toInt()}km/h",
-                subValue = "2 km/h",
-                subValueColor = Color.Red
+
             )
 
             WeatherInfoCard(
@@ -102,8 +118,7 @@ fun WeatherStats(current1: Day) {
                 Image = R.drawable.light_mode,
                 label = "UV Index",
                 mainValue = "${current!!.uv}",
-                subValue = "0.3",
-                subValueColor = Color.Red
+
             )
         }
         Row(
@@ -114,17 +129,14 @@ fun WeatherStats(current1: Day) {
                 Modifier.weight(1f),
                 Image = R.drawable.waves,
                 label = "Pressure",
-                mainValue = "${current!!.daily_chance_of_snow}",
-                subValue = "32 hpa",
-                subValueColor = Color.Magenta
+                mainValue = "$pressure hpa",
+
             )
             WeatherInfoCard(
                 Modifier.weight(1f),
                 Image = R.drawable.rainy,
                 label = "Rain Chance",
                 mainValue = "${current!!.daily_chance_of_rain}%",
-                subValue = "10%",
-                subValueColor = Color.Magenta
             )
         }
     }
